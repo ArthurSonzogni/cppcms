@@ -7,11 +7,16 @@
 #
 
 cmake_minimum_required(VERSION 2.6)
+
+hunter_add_package(libpcre)
+find_package(libpcre CONFIG REQUIRED)
+
 project(booster)
 include(CheckFunctionExists)
 include(CheckCXXSourceCompiles)
 include(CheckLibraryExists)
 enable_testing()
+
 #
 # Most important includes
 #
@@ -266,7 +271,6 @@ endif(NOT CMAKE_BUILD_TYPE)
 if("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
 	if(MSVC)
 		set(ICU_SUFFIX "d")
-		set(PCRE_SUFFIX "d")
 		if(NOT BOOSTER_SUFFIX)
 			set(BOOSTER_SUFFIX "-d")
 		else()
@@ -536,29 +540,6 @@ else()
 	set(BOOSTER_SRC ${BOOSTER_SRC} lib/thread/src/pthread.cpp)
 endif()
 
-
-
-find_path(PCRE_INCLUDE pcre.h)
-if(PCRE_INCLUDE)
-	include_directories(${PCRE_INCLUDE})
-endif()
-
-if(NOT PCRE_INCLUDE)
-	find_path(PCRE_INCLUDE2 pcre/pcre.h)
-	include_directories(${PCRE_INCLUDE2}/pcre)
-	if(NOT PCRE_INCLUDE2)
-		message(FATAL_ERROR "Can't find PCRE include directory")
-	endif()
-
-endif()
-
-find_library(PCRE_LIB NAMES pcre${PCRE_SUFFIX} pcre)
-if(NOT PCRE_LIB)
-	message(FATAL_ERROR "Can't find PCRE library")
-endif()
-
-
-
 set(LINK_LIBS )
 
 if(NOT DISABLE_SHARED)
@@ -602,7 +583,7 @@ foreach(ALIB ${LINK_LIBS})
 	if(WS2_32)
 		target_link_libraries(${ALIB} ${WS2_32})
 	endif()
-	target_link_libraries(${ALIB} ${PCRE_LIB})
+  target_link_libraries(${ALIB} PkgConfig::libpcre)
 
 	if(NOT DISABLE_ICU_LOCALE)
 		target_link_libraries(${ALIB} ${ICU_UC})

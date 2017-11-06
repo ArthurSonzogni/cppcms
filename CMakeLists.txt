@@ -1,6 +1,11 @@
 cmake_minimum_required(VERSION 2.6)
 set(CMAKE_LEGACY_CYGWIN_WIN32 0)
 
+include(cmake/HunterGate.cmake)
+HunterGate(
+    URL "https://github.com/ruslo/hunter/archive/v0.19.144.tar.gz"
+    SHA1 "e3efd470f8b60468db8730eac8c04792f77fe1b1"
+)
 
 project(cppcms)
 set(CPPCMS_PACKAGE_NAME "CppCMS")
@@ -30,7 +35,7 @@ if(NOT LIBDIR)
 endif()
 
 
-option(DISABLE_SHARED		"Disable shared libraries build" OFF)
+option(DISABLE_SHARED		"Disable shared libraries build" ON)
 option(DISABLE_STATIC		"Disable static libraries build" OFF)
 option(DISABLE_GCRYPT		"Disable usage of gcrypt library" OFF)
 option(DISABLE_OPENSSL		"Disable usage of openssl library" OFF)
@@ -177,17 +182,6 @@ if(NOT CMAKE_BUILD_TYPE)
 	      FORCE)
 endif(NOT CMAKE_BUILD_TYPE)
 
-if("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
-	if(MSVC)
-		set(ZLIB_SUFFIX "d")
-		if(NOT CPPCMS_SUFFIX)
-			set(CPPCMS_SUFFIX "-d")
-		else()
-			set(CPPCMS_SUFFIX "${CPPCMS_SUFFIX}d")
-		endif()
-	endif()
-endif()
-
 check_cxx_source_compiles(
 	"#include <stdint.h> 
 	int main(){int32_t x; int64_t y; return 0; }"
@@ -267,12 +261,8 @@ check_cxx_source_compiles(
 	CPPCMS_HAVE_FSEEKI64
 )
 if(NOT DISABLE_GZIP)
-	find_library(ZLIB NAMES z zdll zlib${ZLIB_SUFFIX} zlib)
-	find_path(ZLIB_INCLUDE_DIR zlib.h)
-	if(NOT ZLIB OR NOT ZLIB_INCLUDE_DIR)
-		message(FATAL_ERROR "Can't fild zlib")
-	endif()
-	include_directories(${ZLIB_INCLUDE_DIR})
+  hunter_add_package(ZLIB)
+  find_package(ZLIB CONFIG REQUIRED)
 endif()
 
 
@@ -519,7 +509,7 @@ foreach(ALIB ${CPPCMS_LIBS})
 	endif(LIB_DL)
 
 	if(NOT DISABLE_GZIP)
-		target_link_libraries(${ALIB} ${ZLIB})
+    target_link_libraries(${ALIB} ZLIB::zlib)
 	endif()
 	if(USE_STLPORT AND STLPORT_LIB)
 		target_link_libraries(${ALIB} ${STLPORT_LIB})
@@ -772,7 +762,7 @@ add_executable(external_session_test tests/external_session_test.c)
 target_link_libraries(external_session_test ${CPPCMS_LIB})
 set(ALL_TESTS ${ALL_TESTS} external_session_test)
 if(NOT DISABLE_GZIP)
-	target_link_libraries(response_test ${ZLIB})
+	target_link_libraries(response_test ZLIB::zlib)
 endif()
 
 #####################################
