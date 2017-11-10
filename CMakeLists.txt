@@ -8,6 +8,7 @@ HunterGate(
 )
 
 project(cppcms)
+
 set(CPPCMS_PACKAGE_NAME "CppCMS")
 set(CPPCMS_PACKAGE_STRING "CppCMS/1.1.1")
 set(CPPCMS_PACKAGE_VERSION "1.1.1")
@@ -23,6 +24,11 @@ include(CheckCXXSourceCompiles)
 include(CheckLibraryExists)
 include(CPack)
 enable_testing()
+
+hunter_add_package(libpcre)
+find_package(libpcre REQUIRED)
+include_directories(${libpcre_INCLUDE_DIRS})
+link_directories(${libpcre_LIBRARY_DIRS})
 
 #############################################################################
 #

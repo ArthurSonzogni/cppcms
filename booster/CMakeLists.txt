@@ -9,7 +9,9 @@
 cmake_minimum_required(VERSION 2.6)
 
 hunter_add_package(libpcre)
-find_package(libpcre CONFIG REQUIRED)
+find_package(libpcre REQUIRED)
+include_directories(${libpcre_INCLUDE_DIRS})
+link_directories(${libpcre_LIBRARY_DIRS})
 
 project(booster)
 include(CheckFunctionExists)
@@ -397,7 +399,7 @@ check_cxx_source_compiles(
 	BOOSTER_HAVE_INTTYPES_H)
 
 if(IS_WINDOWS)
-	set(CMAKE_REQUIRED_LIBRARIES ${WS2_32})
+  set(CMAKE_REQUIRED_INCLUDE_DIR ${WS2_32})
 	check_cxx_source_compiles(
 	"#include <ws2tcpip.h>
     #include <winsock2.h>
@@ -583,7 +585,7 @@ foreach(ALIB ${LINK_LIBS})
 	if(WS2_32)
 		target_link_libraries(${ALIB} ${WS2_32})
 	endif()
-  target_link_libraries(${ALIB} PkgConfig::libpcre)
+  target_link_libraries(${ALIB} ${libpcre_LIBRARIES})
 
 	if(NOT DISABLE_ICU_LOCALE)
 		target_link_libraries(${ALIB} ${ICU_UC})
